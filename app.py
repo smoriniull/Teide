@@ -90,17 +90,9 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         return "", 0.0
     
     if not api_key:
-        st.error("""
-        ⚠️ **API key de Anthropic no configurada**
-        
-        En Streamlit Cloud → Settings → Secrets, añade:
-        ```
-        anthropic_api_key = "sk-ant-v7-..."
-        ```
-        
-        Obtén tu key en: https://console.anthropic.com/
-        """)
-        return "", 0.0
+        error_msg = "⚠️ API key de Anthropic no configurada. Configura en Streamlit Cloud → Settings → Secrets: anthropic_api_key = sk-ant-api03-TUKEY"
+        st.warning(error_msg)
+        st.stop()
     
     client = anthropic.Anthropic(api_key=api_key)
     
