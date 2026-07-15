@@ -72,29 +72,25 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     Llama a Claude Haiku con contexto cerrado.
     Retorna: (respuesta, latencia_segundos)
     """
-    # Intenta obtener API key de múltiples ubicaciones
+    # Obtener API key sin exponer
     api_key = None
     
     try:
-        # Intento 1: variable directa
         if "anthropic_api_key" in st.secrets:
             api_key = st.secrets["anthropic_api_key"]
-        # Intento 2: dentro de sección [anthropic]
-        elif "anthropic" in st.secrets and "api_key" in st.secrets["anthropic"]:
-            api_key = st.secrets["anthropic"]["api_key"]
-        # Intento 3: variable de entorno (si está disponible)
-        elif "ANTHROPIC_API_KEY" in st.secrets:
-            api_key = st.secrets["ANTHROPIC_API_KEY"]
     except Exception as e:
-        st.error(f"Error al leer secrets: {e}")
+        st.error(f"Error al leer configuración: {e}")
         return "", 0.0
     
     if not api_key:
-        error_msg = "⚠️ API key de Anthropic no configurada. Configura en Streamlit Cloud → Settings → Secrets: anthropic_api_key = sk-ant-api03-TUKEY"
-        st.warning(error_msg)
+        st.warning("❌ Configuración incompleta. Contacta al administrador.")
         st.stop()
     
-    client = anthropic.Anthropic(api_key=api_key)
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+    except Exception as e:
+        st.error(f"Error de configuración: {e}")
+        return "", 0.0
     
     # Construir mensaje del sistema con contexto
     full_system = f"{system_prompt}\n\n---CONTEXTO---\n{context}"
@@ -117,7 +113,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         return assistant_message, latency
     
     except Exception as e:
-        st.error(f"Error al llamar a Claude: {e}")
+        st.error(f"Error: {e}")
         return "", 0.0
 
 def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
