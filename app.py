@@ -72,12 +72,35 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     Llama a Claude Haiku con contexto cerrado.
     Retorna: (respuesta, latencia_segundos)
     """
+    # Intenta obtener API key de múltiples ubicaciones
+    api_key = None
+    
     try:
-        api_key = st.secrets.get("anthropic_api_key", None)
-        if not api_key:
-            return "Error: API key de Anthropic no configurada. Contacta al administrador.", 0.0
-    except:
-        return "Error: No se puede acceder a configuración de Anthropic. Contacta al administrador.", 0.0
+        # Intento 1: variable directa
+        if "anthropic_api_key" in st.secrets:
+            api_key = st.secrets["anthropic_api_key"]
+        # Intento 2: dentro de sección [anthropic]
+        elif "anthropic" in st.secrets and "api_key" in st.secrets["anthropic"]:
+            api_key = st.secrets["anthropic"]["api_key"]
+        # Intento 3: variable de entorno (si está disponible)
+        elif "ANTHROPIC_API_KEY" in st.secrets:
+            api_key = st.secrets["ANTHROPIC_API_KEY"]
+    except Exception as e:
+        st.error(f"Error al leer secrets: {e}")
+        return "", 0.0
+    
+    if not api_key:
+        st.error("""
+        ⚠️ **API key de Anthropic no configurada**
+        
+        En Streamlit Cloud → Settings → Secrets, añade:
+        ```
+        anthropic_api_key = "sk-ant-v7-..."
+        ```
+        
+        Obtén tu key en: https://console.anthropic.com/
+        """)
+        return "", 0.0
     
     client = anthropic.Anthropic(api_key=api_key)
     
