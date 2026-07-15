@@ -83,7 +83,12 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         return "", 0.0
     
     if not api_key:
+<<<<<<< HEAD
         st.warning("❌ Configuración incompleta. Contacta al administrador.")
+=======
+        error_msg = "⚠️ API key de Anthropic no configurada. Configura en Streamlit Cloud → Settings → Secrets: anthropic_api_key = sk-ant-api03-TUKEY"
+        st.warning(error_msg)
+>>>>>>> 1bb131697fcd62800bf61a4a300834dbbf8db438
         st.stop()
     
     try:
