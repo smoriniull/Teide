@@ -11,7 +11,15 @@
 
 ## Pasos de Setup
 
-### 1. Preparar Supabase
+### 1. Obtener API key de Anthropic (REQUERIDO PARA FUNCIONAR)
+
+1. Ir a https://console.anthropic.com/
+2. Crear cuenta o iniciar sesión
+3. Ir a "API Keys" 
+4. Crear nueva key (copiar y guardar — **solo la ves una vez**)
+5. Necesitarás esta key en Streamlit Cloud (ver paso 4 más abajo)
+
+### 2. Preparar Supabase (OPCIONAL - para guardar datos en BD)
 
 1. Crear tabla en Supabase:
 ```sql
@@ -32,7 +40,7 @@ CREATE TABLE interactions (
    - `supabase_url` (Settings → API → Project URL)
    - `supabase_key` (Settings → API → anon public key)
 
-### 2. Preparar GitHub
+### 3. Preparar GitHub
 
 1. Crear repositorio público en GitHub
 2. Subir estos archivos:
@@ -42,11 +50,15 @@ CREATE TABLE interactions (
    - requirements.txt
    - context_A.txt
    - context_B.txt
+   - context_C.txt
+   - context_D.txt
    - .gitignore
+   - runtime.txt
+   - README.md
 
-**NO subir:** `secrets_example.toml` (renombrarlo a `.gitignore`)
+**NO subir:** `secrets_example.toml` (contiene claves secretas)
 
-### 3. Streamlit Cloud Deployment
+### 4. Streamlit Cloud Deployment
 
 1. Ir a https://share.streamlit.io/
 2. Conectar tu repo de GitHub
@@ -55,8 +67,17 @@ CREATE TABLE interactions (
    - Branch: main
    - Main file path: app.py
 
-4. Ir a **Settings → Secrets** y pegar (desde `secrets_example.toml`):
+4. Ir a **Settings → Secrets** y pegar tu configuración:
+
+**Mínimo requerido (el chatbot funciona con esto):**
 ```toml
+anthropic_api_key = "sk-ant-v7-..."
+```
+
+**Opcional (si quieres guardar datos en Supabase):**
+```toml
+anthropic_api_key = "sk-ant-v7-..."
+
 [supabase]
 url = "https://your-project.supabase.co"
 key = "your-anon-key"

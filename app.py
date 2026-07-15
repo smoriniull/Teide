@@ -72,7 +72,14 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     Llama a Claude Haiku con contexto cerrado.
     Retorna: (respuesta, latencia_segundos)
     """
-    client = anthropic.Anthropic()
+    try:
+        api_key = st.secrets.get("anthropic_api_key", None)
+        if not api_key:
+            return "Error: API key de Anthropic no configurada. Contacta al administrador.", 0.0
+    except:
+        return "Error: No se puede acceder a configuración de Anthropic. Contacta al administrador.", 0.0
+    
+    client = anthropic.Anthropic(api_key=api_key)
     
     # Construir mensaje del sistema con contexto
     full_system = f"{system_prompt}\n\n---CONTEXTO---\n{context}"
