@@ -134,22 +134,29 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
 def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
     """Registra interacción en Supabase"""
-    print(f"[MAIN] log_interaction called - role={role}, turn={turn_number}")
+    if "db_log" not in st.session_state:
+        st.session_state.db_log = []
+    
+    msg = f"[{role.upper()}] T{turn_number}: guardando en Supabase..."
+    st.session_state.db_log.append(msg)
+    
     if st.session_state.db.connection is None:
-        print("[MAIN] Connection is None, returning")
+        st.session_state.db_log.append("ERROR: connection is None")
         return
     
-    print(f"[MAIN] Calling db.log_interaction...")
-    st.session_state.db.log_interaction(
-        participant_id=participant_id,
-        condition_id=chatbot_id,
-        condition_label=condition_label,
-        turn_number=turn_number,
-        role=role,
-        message=message,
-        latency_seconds=latency
-    )
-    print(f"[MAIN] db.log_interaction completed")
+    try:
+        result = st.session_state.db.log_interaction(
+            participant_id=participant_id,
+            condition_id=chatbot_id,
+            condition_label=condition_label,
+            turn_number=turn_number,
+            role=role,
+            message=message,
+            latency_seconds=latency
+        )
+        st.session_state.db_log.append(f"✓ Guardado exitosamente")
+    except Exception as e:
+        st.session_state.db_log.append(f"✗ ERROR: {e}")
 
 # Main
 chatbot_id = get_chatbot_id()
@@ -217,7 +224,11 @@ if user_input:
     st.rerun()
 
 # Mostrar debug Supabase
-with st.expander("🔧 Debug Info (Supabase)"):
+with st.expander("🔧 Debug Info"):
     st.write(f"Supabase connection: {st.session_state.db.use_supabase}")
     st.write(f"Connection object exists: {st.session_state.db.connection is not None}")
+    if "db_log" in st.session_state:
+        st.write("**DB Log:**")
+        for log_msg in st.session_state.db_log[-10:]:
+            st.write(f"• {log_msg}")
 
