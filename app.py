@@ -14,6 +14,11 @@ def log_error(msg):
     st.session_state.error_log.append(msg)
     st.error(f"DEBUG: {msg}")
 
+# Mostrar log de errores acumulados
+if "error_log" in st.session_state and st.session_state.error_log:
+    st.error("ERRORES ACUMULADOS:")
+    for err in st.session_state.error_log[-5:]:  # últimos 5
+        st.write(f"• {err}")
 
 
 # Configuración de página
@@ -77,6 +82,11 @@ def initialize_session(chatbot_id: int):
     if "db" not in st.session_state:
         st.session_state.db = SupabaseConnection()
 
+def log_error(msg):
+    if "error_log" not in st.session_state:
+        st.session_state.error_log = []
+    st.session_state.error_log.append(msg)
+
 def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[str, float]:
     api_key = None
     
@@ -121,7 +131,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         return "", 0.0
 
 
-        
+
 def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
     """Registra interacción en Supabase"""
