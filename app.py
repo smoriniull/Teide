@@ -212,3 +212,9 @@ if user_input:
     )
     
     st.rerun()
+
+# Mostrar debug Supabase
+with st.expander("🔧 Debug Info (Supabase)"):
+    st.write(f"Supabase connection: {st.session_state.db.use_supabase}")
+    st.write(f"Connection object exists: {st.session_state.db.connection is not None}")
+
