@@ -7,34 +7,55 @@ from db import SupabaseConnection
 from prompts import PROMPTS_MAP
 
 # DEBUG - mostrar errores en pantalla
-if "error_log" not in st.session_state:
-    st.session_state.error_log = []
+# if "error_log" not in st.session_state:
+#     st.session_state.error_log = []
 
-def log_error(msg):
-    st.session_state.error_log.append(msg)
-    st.error(f"DEBUG: {msg}")
+# def log_error(msg):
+#     st.session_state.error_log.append(msg)
+#     st.error(f"DEBUG: {msg}")
 
-# Mostrar log de errores acumulados
-if "error_log" in st.session_state and st.session_state.error_log:
-    st.error("ERRORES ACUMULADOS:")
-    for err in st.session_state.error_log[-5:]:  # últimos 5
-        st.write(f"• {err}")
+# # Mostrar log de errores acumulados
+# if "error_log" in st.session_state and st.session_state.error_log:
+#     st.error("ERRORES ACUMULADOS:")
+#     for err in st.session_state.error_log[-5:]:  # últimos 5
+#         st.write(f"• {err}")
 
 
 # Configuración de página
 st.set_page_config(page_title="Chatbot", layout="centered", initial_sidebar_state="collapsed")
 
+
+
+# ============ CONFIGURACIÓN DE VARIABLES EXPERIMENTALES ============
+# 
+# Var1 (Tono):
+#   A = Formal (lenguaje profesional, distancia)
+#   B = Informal (lenguaje cercano, amable)
+#
+# Var2 (Personalización):
+#   A = Genérica (respuestas iguales para todos)
+#   B = Personalizada (adaptada al contexto del usuario)
+#
+# Context (2 opciones - definidas en context_A.txt y context_B.txt):
+#   A = Teide como "última oportunidad" (urgencia FOMO)
+#   B = Teide como "fragilidad" (conciencia responsable)
+#   C = Teide como "regenerativo" (participación activa)
+#   D = Teide neutro (información factual - control)
+#
+# Total: 4 contextos × 2 vars (Var1) × 2 vars (Var2) = 16 combinaciones posibles
+# Implementados: 8 chatbots (4 contextos × 2 vars de Var1 solamente)
+# ====================================================================
 # Mapeo de chatbot_id a (contexto, variables de prompt)
 # 4 contextos × 2 variables de prompt = 8 chatbots
 CHATBOT_CONFIG = {
-    1: {"context": "A", "var1": "A", "var2": "A", "label": "Context A - Prompt Var1_A Var2_A"},
-    2: {"context": "A", "var1": "A", "var2": "B", "label": "Context A - Prompt Var1_A Var2_B"},
-    3: {"context": "B", "var1": "A", "var2": "A", "label": "Context B - Prompt Var1_A Var2_A"},
-    4: {"context": "B", "var1": "A", "var2": "B", "label": "Context B - Prompt Var1_A Var2_B"},
-    5: {"context": "C", "var1": "A", "var2": "A", "label": "Context C - Prompt Var1_A Var2_A"},
-    6: {"context": "C", "var1": "A", "var2": "B", "label": "Context C - Prompt Var1_A Var2_B"},
-    7: {"context": "D", "var1": "A", "var2": "A", "label": "Context D - Prompt Var1_A Var2_A"},
-    8: {"context": "D", "var1": "A", "var2": "B", "label": "Context D - Prompt Var1_A Var2_B"},
+    1: {"context": "A", "var1": "A", "label": "Context_A-Formal"},
+    2: {"context": "A", "var1": "B", "label": "Context_A-Informal"},
+    3: {"context": "B", "var1": "A", "label": "Context_B-Formal"},
+    4: {"context": "B", "var1": "B", "label": "Context_B-Informal"},
+    5: {"context": "C", "var1": "A", "label": "Context_C-Formal"},
+    6: {"context": "C", "var1": "B", "label": "Context_C-Informal"},
+    7: {"context": "D", "var1": "A", "label": "Context_D-Formal"},
+    8: {"context": "D", "var1": "B", "label": "Context_D-Informal"},
 }
 
 def load_context(context_id: str) -> str:
@@ -133,10 +154,12 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
 
 def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
-    if "db_log" not in st.session_state:
-        st.session_state.db_log = []
+    """Registra interacción en Supabase"""
+    # DEBUG: Logging temporal
+    # if "db_log" not in st.session_state:
+    #     st.session_state.db_log = []
     
-    success, msg = st.session_state.db.log_interaction(
+    st.session_state.db.log_interaction(
         participant_id=participant_id,
         condition_id=chatbot_id,
         condition_label=condition_label,
@@ -146,10 +169,14 @@ def log_interaction(participant_id: str, chatbot_id: int, turn_number: int,
         latency_seconds=latency
     )
     
-    if success:
-        st.session_state.db_log.append(f"✓ [{role}] guardado")
-    else:
-        st.session_state.db_log.append(f"✗ [{role}] ERROR: {msg}")
+    # DEBUG: Guardar resultado en sesión (comentado)
+    # success, msg = result
+    # if success:
+    #     st.session_state.db_log.append(f"✓ [{role}] guardado")
+    # else:
+    #     st.session_state.db_log.append(f"✗ [{role}] ERROR: {msg}")
+
+
 # Main
 chatbot_id = get_chatbot_id()
 initialize_session(chatbot_id)
@@ -213,14 +240,14 @@ if user_input:
         condition_label=config["label"]
     )
     
-    #st.rerun()
+    st.rerun()
 
 # Mostrar debug Supabase
-with st.expander("🔧 Debug Info"):
-    st.write(f"Supabase connection: {st.session_state.db.use_supabase}")
-    st.write(f"Connection object exists: {st.session_state.db.connection is not None}")
-    if "db_log" in st.session_state:
-        st.write("**DB Log:**")
-        for log_msg in st.session_state.db_log[-10:]:
-            st.write(f"• {log_msg}")
+# with st.expander("🔧 Debug Info"):
+#     st.write(f"Supabase connection: {st.session_state.db.use_supabase}")
+#     st.write(f"Connection object exists: {st.session_state.db.connection is not None}")
+#     if "db_log" in st.session_state:
+#         st.write("**DB Log:**")
+#         for log_msg in st.session_state.db_log[-10:]:
+#             st.write(f"• {log_msg}")
 
