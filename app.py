@@ -183,7 +183,7 @@ initialize_session(chatbot_id)
 
 config = CHATBOT_CONFIG[chatbot_id]
 context = load_context(config["context"])
-system_prompt = PROMPTS_MAP.get((config["var1"], config["var2"]), "")
+system_prompt = PROMPTS_MAP.get((config["context"], config["var1"]), "")
 
 if not system_prompt:
     st.error(f"Prompt no encontrado para var1={config['var1']}, var2={config['var2']}")
