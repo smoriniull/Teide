@@ -221,7 +221,7 @@ if user_input:
         condition_label=config["label"]
     )
     
-    st.rerun()
+    #st.rerun()
 
 # Mostrar debug Supabase
 with st.expander("🔧 Debug Info"):
