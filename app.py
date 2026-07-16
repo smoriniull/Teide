@@ -6,6 +6,16 @@ import anthropic
 from db import SupabaseConnection
 from prompts import PROMPTS_MAP
 
+# DEBUG - mostrar errores en pantalla
+if "error_log" not in st.session_state:
+    st.session_state.error_log = []
+
+def log_error(msg):
+    st.session_state.error_log.append(msg)
+    st.error(f"DEBUG: {msg}")
+
+
+
 # Configuración de página
 st.set_page_config(page_title="Chatbot", layout="centered", initial_sidebar_state="collapsed")
 
@@ -68,53 +78,50 @@ def initialize_session(chatbot_id: int):
         st.session_state.db = SupabaseConnection()
 
 def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[str, float]:
-    """
-    Llama a Claude Haiku con contexto cerrado.
-    Retorna: (respuesta, latencia_segundos)
-    """
-    # Obtener API key sin exponer
     api_key = None
     
     try:
         if "anthropic_api_key" in st.secrets:
             api_key = st.secrets["anthropic_api_key"]
+            log_error(f"API key found (len={len(api_key)})")
+        else:
+            log_error("API key NOT in secrets")
     except Exception as e:
-        st.error(f"Error al leer configuración: {e}")
+        log_error(f"Error reading secrets: {e}")
         return "", 0.0
     
     if not api_key:
-        st.warning("❌ Configuración incompleta. Contacta al administrador.")
-        st.stop()    
-    try:
-        client = anthropic.Anthropic(api_key=api_key)
-    except Exception as e:
-        st.error(f"Error de configuración: {e}")
+        log_error("API key is empty")
         return "", 0.0
     
-    # Construir mensaje del sistema con contexto
-    full_system = f"{system_prompt}\n\n---CONTEXTO---\n{context}"
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        log_error("Anthropic client created")
+    except Exception as e:
+        log_error(f"Error creating client: {e}")
+        return "", 0.0
     
+    full_system = f"{system_prompt}\n\n---CONTEXTO---\n{context}"
     start_time = time.time()
     
     try:
+        log_error("Calling Claude API...")
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=1000,
             system=full_system,
-            messages=[
-                {"role": "user", "content": user_message}
-            ]
+            messages=[{"role": "user", "content": user_message}]
         )
-        
         latency = time.time() - start_time
         assistant_message = response.content[0].text
-        
+        log_error(f"Response received in {latency:.2f}s")
         return assistant_message, latency
-    
     except Exception as e:
-        st.error(f"Error: {e}")
+        log_error(f"API Error: {type(e).__name__}: {str(e)[:100]}")
         return "", 0.0
 
+
+        
 def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
     """Registra interacción en Supabase"""
