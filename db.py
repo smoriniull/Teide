@@ -25,12 +25,14 @@ class SupabaseConnection:
             print(f"[DB] Error conectando Supabase: {e}")
             self.use_supabase = False
     
+    
+
+
     def log_interaction(self, participant_id: str, condition_id: int, condition_label: str,
-                   turn_number: int, role: str, message: str, latency_seconds: float) -> bool:
+                   turn_number: int, role: str, message: str, latency_seconds: float) ->tuple[bool, str]:
         """Registra una interacción en Supabase"""
         if not self.use_supabase or not self.connection:
-            print("[DB] Supabase disabled")
-            return False
+            return False, "Supabase disabled"
     
         try:
             data = {
@@ -44,16 +46,11 @@ class SupabaseConnection:
                 "timestamp_utc": datetime.utcnow().isoformat() + "Z"
             }
         
-            print(f"[DB] Data to insert: {data}")
-            response = self.connection.table("interactions").insert(data).execute()
-            print(f"[DB] Insert response: {response}")
-            return True
+            self.connection.table("interactions").insert(data).execute()
+            return True, "OK"
     
         except Exception as e:
-            print(f"[DB] Insert ERROR: {type(e).__name__}: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return False
+            return False, f"{type(e).__name__}: {str(e)}"
     
     def get_participant_interactions(self, participant_id: str) -> list:
         """Recupera todas las interacciones de un participante"""
