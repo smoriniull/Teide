@@ -190,8 +190,10 @@ if not system_prompt:
     st.stop()
 
 # UI
-st.title(f"Chatbot #{chatbot_id}")
-st.caption(f"Session: {st.session_state.participant_id[:8]}...")
+#st.title(f"Chatbot #{chatbot_id}")
+#st.caption(f"Session: {st.session_state.participant_id[:8]}...")
+st.title("Explora el Teide")
+st.caption(f"Grupo: {config['label']}")
 
 # Historial de mensajes
 for msg in st.session_state.messages:
