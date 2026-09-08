@@ -141,7 +141,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         log_error("Calling Claude API...")
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=400,
+            max_tokens=600,
             system=full_system,
             messages=[{"role": "user", "content": user_message}]
         )
