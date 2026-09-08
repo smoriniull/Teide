@@ -204,7 +204,7 @@ if not system_prompt:
 # UI
 #st.title(f"Chatbot #{chatbot_id}")
 #st.caption(f"Session: {st.session_state.participant_id[:8]}...")
-st.title("Explora el Teide")
+st.title("Guía de tu visita al Teide")
 st.caption(f"Grupo: {config['label']}")
 
 # Historial de mensajes
