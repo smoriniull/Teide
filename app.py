@@ -190,6 +190,9 @@ with st.sidebar:
     st.caption("Guarda este código para vincular con la encuesta posterior")
     st.markdown("---")
 
+st.warning(f"Guarda tu código de sesión: {st.session_state.session_code} (necesario para la encuesta)")
+
+
 config = CHATBOT_CONFIG[chatbot_id]
 context = load_context(config["context"])
 system_prompt = PROMPTS_MAP.get((config["context"], config["var1"]), "")
