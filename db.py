@@ -28,15 +28,16 @@ class SupabaseConnection:
     
 
 
-    def log_interaction(self, participant_id: str, condition_id: int, condition_label: str,
-                   turn_number: int, role: str, message: str, latency_seconds: float) ->tuple[bool, str]:
-        """Registra una interacción en Supabase"""
+    def log_interaction(self, participant_id: str, session_code: str, condition_id: int, condition_label: str,
+                   turn_number: int, role: str, message: str, latency_seconds: float) -> tuple[bool, str]:
+        """Retorna (success, error_message)"""
         if not self.use_supabase or not self.connection:
             return False, "Supabase disabled"
     
         try:
             data = {
                 "participant_id": participant_id,
+                "session_code": session_code,  # ← AÑADIR ESTO
                 "condition_id": condition_id,
                 "condition_label": condition_label,
                 "turn_number": turn_number,

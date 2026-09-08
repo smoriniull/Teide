@@ -90,7 +90,8 @@ def initialize_session(chatbot_id: int):
     """Inicializa variables de sesión"""
     if "participant_id" not in st.session_state:
         st.session_state.participant_id = str(uuid.uuid4())
-    
+        # Generar código corto (primeros 8 caracteres)
+        st.session_state.session_code = st.session_state.participant_id[:8].upper()
     if "chatbot_id" not in st.session_state:
         st.session_state.chatbot_id = chatbot_id
     
@@ -102,6 +103,7 @@ def initialize_session(chatbot_id: int):
     
     if "db" not in st.session_state:
         st.session_state.db = SupabaseConnection()
+
 
 def log_error(msg):
     if "error_log" not in st.session_state:
@@ -139,7 +141,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         log_error("Calling Claude API...")
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=1000,
+            max_tokens=400,
             system=full_system,
             messages=[{"role": "user", "content": user_message}]
         )
@@ -180,6 +182,12 @@ def log_interaction(participant_id: str, chatbot_id: int, turn_number: int,
 # Main
 chatbot_id = get_chatbot_id()
 initialize_session(chatbot_id)
+with st.sidebar:
+    st.markdown("---")
+    st.subheader("Tu código de sesión")
+    st.code(st.session_state.session_code, language="text")
+    st.caption("Guarda este código para vincular con la encuesta posterior")
+    st.markdown("---")
 
 config = CHATBOT_CONFIG[chatbot_id]
 context = load_context(config["context"])
@@ -224,6 +232,7 @@ if user_input:
     # Registrar en Supabase
     log_interaction(
         participant_id=st.session_state.participant_id,
+        session_code=st.session_state.session_code,
         chatbot_id=chatbot_id,
         turn_number=st.session_state.turn_number,
         role="user",
@@ -234,6 +243,7 @@ if user_input:
     
     log_interaction(
         participant_id=st.session_state.participant_id,
+        session_code=st.session_state.session_code,
         chatbot_id=chatbot_id,
         turn_number=st.session_state.turn_number,
         role="assistant",
