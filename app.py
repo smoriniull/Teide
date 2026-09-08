@@ -154,7 +154,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
         return "", 0.0
 
 
-def log_interaction(participant_id: str, chatbot_id: int, turn_number: int, 
+def log_interaction(participant_id: str, session_code: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
     """Registra interacción en Supabase"""
     # DEBUG: Logging temporal
@@ -163,6 +163,7 @@ def log_interaction(participant_id: str, chatbot_id: int, turn_number: int,
     
     st.session_state.db.log_interaction(
         participant_id=participant_id,
+        session_code=session_code,
         condition_id=chatbot_id,
         condition_label=condition_label,
         turn_number=turn_number,
