@@ -48,14 +48,14 @@ st.set_page_config(page_title="Chatbot", layout="centered", initial_sidebar_stat
 # Mapeo de chatbot_id a (contexto, variables de prompt)
 # 4 contextos × 2 variables de prompt = 8 chatbots
 CHATBOT_CONFIG = {
-    1: {"context": "A", "var1": "A", "label": "Context_A-Formal"},
-    2: {"context": "A", "var1": "B", "label": "Context_A-Informal"},
-    3: {"context": "B", "var1": "A", "label": "Context_B-Formal"},
-    4: {"context": "B", "var1": "B", "label": "Context_B-Informal"},
-    5: {"context": "C", "var1": "A", "label": "Context_C-Formal"},
-    6: {"context": "C", "var1": "B", "label": "Context_C-Informal"},
-    7: {"context": "D", "var1": "A", "label": "Context_D-Formal"},
-    8: {"context": "D", "var1": "B", "label": "Context_D-Informal"},
+    1: {"context": "A", "var1": "A", "label": "A-G"},
+    2: {"context": "A", "var1": "B", "label": "A-P"},
+    3: {"context": "B", "var1": "A", "label": "B-G"},
+    4: {"context": "B", "var1": "B", "label": "B-P"},
+    5: {"context": "C", "var1": "A", "label": "C-G"},
+    6: {"context": "C", "var1": "B", "label": "C-P"},
+    7: {"context": "D", "var1": "A", "label": "D-G"},
+    8: {"context": "D", "var1": "B", "label": "D-P"},
 }
 
 def load_context(context_id: str) -> str:
