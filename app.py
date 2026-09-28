@@ -116,7 +116,6 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     try:
         if "anthropic_api_key" in st.secrets:
             api_key = st.secrets["anthropic_api_key"]
-            log_error(f"API key found (len={len(api_key)})")
         else:
             log_error("API key NOT in secrets")
     except Exception as e:
@@ -129,12 +128,16 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     
     try:
         client = anthropic.Anthropic(api_key=api_key)
-        log_error("Anthropic client created")
     except Exception as e:
         log_error(f"Error creating client: {e}")
         return "", 0.0
     
     full_system = f"{system_prompt}\n\n---CONTEXTO---\n{context}"
+    
+    # Construir historial COMPLETO de mensajes
+    messages = st.session_state.messages.copy()  # Todo el historial
+    messages.append({"role": "user", "content": user_message})  # + último mensaje
+    
     start_time = time.time()
     
     try:
@@ -143,7 +146,7 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
             model="claude-haiku-4-5-20251001",
             max_tokens=600,
             system=full_system,
-            messages=[{"role": "user", "content": user_message}]
+            messages=messages  # ← AQUÍ: historial completo
         )
         latency = time.time() - start_time
         assistant_message = response.content[0].text
@@ -152,7 +155,6 @@ def call_claude(user_message: str, system_prompt: str, context: str) -> tuple[st
     except Exception as e:
         log_error(f"API Error: {type(e).__name__}: {str(e)[:100]}")
         return "", 0.0
-
 
 def log_interaction(participant_id: str, session_code: str, chatbot_id: int, turn_number: int, 
                    role: str, message: str, latency: float, condition_label: str):
