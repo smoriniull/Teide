@@ -28,21 +28,18 @@ st.set_page_config(page_title="Chatbot", layout="centered", initial_sidebar_stat
 
 # ============ CONFIGURACIÓN DE VARIABLES EXPERIMENTALES ============
 # 
-# Var1 (Tono):
-#   A = Formal (lenguaje profesional, distancia)
-#   B = Informal (lenguaje cercano, amable)
 #
 # Var2 (Personalización):
 #   A = Genérica (respuestas iguales para todos)
 #   B = Personalizada (adaptada al contexto del usuario)
 #
-# Context (2 opciones - definidas en context_A.txt y context_B.txt):
+# Context (4 opciones - definidas en context_A.txt y context_B.txt):
 #   A = Teide como "última oportunidad" (urgencia FOMO)
 #   B = Teide como "fragilidad" (conciencia responsable)
 #   C = Teide como "regenerativo" (participación activa)
 #   D = Teide neutro (información factual - control)
-#
-# Total: 4 contextos × 2 vars (Var1) × 2 vars (Var2) = 16 combinaciones posibles
+# El contexto se puso en el prompt
+# Total: 4 contextos × 2 vars (Var1) =8 combinaciones posibles
 # Implementados: 8 chatbots (4 contextos × 2 vars de Var1 solamente)
 # ====================================================================
 # Mapeo de chatbot_id a (contexto, variables de prompt)
@@ -50,21 +47,21 @@ st.set_page_config(page_title="Chatbot", layout="centered", initial_sidebar_stat
 CHATBOT_CONFIG = {
     1: {"context": "A", "var1": "A", "label": "A-G"},
     2: {"context": "A", "var1": "B", "label": "A-P"},
-    3: {"context": "B", "var1": "A", "label": "B-G"},
-    4: {"context": "B", "var1": "B", "label": "B-P"},
-    5: {"context": "C", "var1": "A", "label": "C-G"},
-    6: {"context": "C", "var1": "B", "label": "C-P"},
-    7: {"context": "D", "var1": "A", "label": "D-G"},
-    8: {"context": "D", "var1": "B", "label": "D-P"},
+    3: {"context": "A", "var1": "A", "label": "B-G"},
+    4: {"context": "A", "var1": "B", "label": "B-P"},
+    5: {"context": "A", "var1": "A", "label": "C-G"},
+    6: {"context": "A", "var1": "B", "label": "C-P"},
+    7: {"context": "A", "var1": "A", "label": "D-G"},
+    8: {"context": "A", "var1": "B", "label": "D-P"},
 }
 
-def load_context(context_id: str) -> str:
-    """Carga contexto desde fichero .txt"""
+def load_context() -> str:
+    """Carga contexto unificado desde fichero único"""
     try:
-        with open(f"context_{context_id}.txt", "r", encoding="utf-8") as f:
+        with open("context.txt", "r", encoding="utf-8") as f:  # ← Fichero único
             return f.read()
     except FileNotFoundError:
-        st.error(f"Contexto no encontrado: context_{context_id}.txt")
+        st.error("Contexto no encontrado: context.txt")
         return ""
 
 def get_chatbot_id():
@@ -196,17 +193,17 @@ st.warning(f"Guarda tu código de sesión: {st.session_state.session_code} (nece
 
 
 config = CHATBOT_CONFIG[chatbot_id]
-context = load_context(config["context"])
+context = load_context()  
 system_prompt = PROMPTS_MAP.get((config["context"], config["var1"]), "")
 
 if not system_prompt:
-    st.error(f"Prompt no encontrado para var1={config['var1']}, var2={config['var2']}")
+    st.error(f"Prompt no encontrado para var1={config['var1']}")
     st.stop()
 
 # UI
 #st.title(f"Chatbot #{chatbot_id}")
 #st.caption(f"Session: {st.session_state.participant_id[:8]}...")
-st.title("Guía de tu visita al Teide")
+st.title("Guía de tu visita al Paque Nacional del Teide")
 st.caption(f"Grupo: {config['label']}")
 
 # Historial de mensajes
